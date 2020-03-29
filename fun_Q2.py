@@ -42,8 +42,10 @@ def CN(K,r,T,vol,n_a,n_t,type,barrier = None):
             grid[0][k] = 0
             grid[S_max][k] = S_max - K*exp(-r*k*delta_t)
         elif type == "european put":
-            grid[0][k] = K*exp(-r*k*delta_t)
-            grid[S_max][k] = 0
+            grid[S_max][k] = K*exp(-r*k*delta_t)
+            grid[0][k] = 0
+
+    # terminal condition
 
     grid[n_t,:] = max(range(0,S_max,delta_a)-K,0)
 
@@ -67,8 +69,10 @@ def CN(K,r,T,vol,n_a,n_t,type,barrier = None):
                 h_k = -Ak*vect_gk[j-1]-Bk*vect_gk[j]-Ck*vect_gk[j+1]
                 if type == "european call" or type == "european put":
                     gu_1[j] = gu[j] + (w/betak_1)*(h_k-alphak_1*gu_1[j-1]-betak_1*gu[j]-lambdak_1*gu[j+1]) 
-                else : 
-                    gu_1[j] = max(gu[j] + (w/betak_1)*(h_k-alphak_1*gu_1[j-1]-betak_1*gu[j]-lambdak_1*gu[j+1]),(n_a-j)*S_max-K)  
+                elif type == "american put" : 
+                    gu_1[j] = max(gu[j] + (w/betak_1)*(h_k-alphak_1*gu_1[j-1]-betak_1*gu[j]-lambdak_1*gu[j+1]),K-(n_a-j)*S_max)  
+                elif type == "american call" :
+                    gu_1[j] = max(gu[j] + (w/betak_1)*(h_k-alphak_1*gu_1[j-1]-betak_1*gu[j]-lambdak_1*gu[j+1]),(n_a-j)*S_max-K) 
             eps = np.sqrt(np.dot((gu-gu_1)[1:-1],(gu-gu_1)[1:-1]))          ############### A verifier
             gu = gu_1
         grid[n_t-i,:] = gu_1
